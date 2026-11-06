@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>רשימת קניות חכמה משפחתית</title>
+    <!-- PWA Web App Meta for Native App Feel -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="קניות משפחה">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3724/3724788.png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Rubik -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Rubik', sans-serif;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col bg-slate-50 antialiased selection:bg-emerald-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-30 border-b border-slate-200/60">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-gradient-to-tr from-emerald-600 to-teal-500 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg shadow-emerald-500/25">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                        <span>קניות בקלות</span>
+                        <span class="text-xs bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full font-bold">אישי ומהיר</span>
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-500 font-medium">רשימת קניות מותאמת אישית לפי סופרמרקט</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Supermarket Selector -->
+                <div class="relative">
+                    <select id="supermarket-select" onchange="changeSupermarket(this.value)" class="bg-emerald-50 border border-emerald-200 text-emerald-800 font-extrabold text-sm rounded-2xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-sm">
+                        <option value="שופרסל">🛒 שופרסל</option>
+                        <option value="רמי לוי">🛒 רמי לוי</option>
+                        <option value="יוחננוף">🛒 יוחננוף</option>
+                        <option value="אושר עד">🛒 אושר עד</option>
+                        <option value="ויקטורי">🛒 ויקטורי</option>
+                    </select>
+                </div>
+
+                <!-- Family Sync Button -->
+                <button onclick="openFamilySyncModal()" class="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2.5 rounded-2xl font-bold transition-all text-xs shadow-md shadow-slate-900/10 active:scale-95">
+                    <i class="fa-solid fa-users"></i>
+                    <span id="family-code-btn-text">קוד משפחתי</span>
+                </button>
+
+                <!-- Add Custom Product Button -->
+                <button onclick="openCustomModal()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-2xl font-bold transition-all text-sm shadow-md shadow-emerald-600/20 active:scale-95">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>הוסף מוצר</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Supermarket Selection Onboarding Modal -->
+    <div id="super-onboarding-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 text-center animate-fadeIn">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-sm">
+                <i class="fa-solid fa-store"></i>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900 mb-2">מאיזה סופר אתה קונה היום?</h2>
+            <p class="text-sm text-slate-500 font-medium mb-6">בחר את הרשת המבוקשת כדי להתחיל לבנות את רשימת המוצרים שלך:</p>
+            
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button onclick="selectSupermarketFromModal('שופרסל')" class="p-4 border-2 border-slate-100 hover:border-emerald-500 hover:bg-emerald-50/50 rounded-2xl flex flex-col items-center gap-2 transition-all group">
+                    <span class="text-3xl">🛒</span>
+                    <span class="font-extrabold text-slate-800 group-hover:text-emerald-700 text-sm">שופרסל</span>
+                </button>
+                <button onclick="selectSupermarketFromModal('רמי לוי')" class="p-4 border-2 border-slate-100 hover:border-emerald-500 hover:bg-emerald-50/50 rounded-2xl flex flex-col items-center gap-2 transition-all group">
+                    <span class="text-3xl">🛍️</span>
+                    <span class="font-extrabold text-slate-800 group-hover:text-emerald-700 text-sm">רמי לוי</span>
+                </button>
+                <button onclick="selectSupermarketFromModal('יוחננוף')" class="p-4 border-2 border-slate-100 hover:border-emerald-500 hover:bg-emerald-50/50 rounded-2xl flex flex-col items-center gap-2 transition-all group">
+                    <span class="text-3xl">🏬</span>
+                    <span class="font-extrabold text-slate-800 group-hover:text-emerald-700 text-sm">יוחננוף</span>
+                </button>
+                <button onclick="selectSupermarketFromModal('אושר עד')" class="p-4 border-2 border-slate-100 hover:border-emerald-500 hover:bg-emerald-50/50 rounded-2xl flex flex-col items-center gap-2 transition-all group">
+                    <span class="text-3xl">📦</span>
+                    <span class="font-extrabold text-slate-800 group-hover:text-emerald-700 text-sm">אושר עד</span>
+                </button>
+            </div>
+            
+            <button onclick="selectSupermarketFromModal('ויקטורי')" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-sm transition-all">
+                ויקטורי
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Area: Split layout -->
+    <main class="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col lg:flex-row gap-8">
+
+        <!-- RIGHT SIDEBAR: Shopping List Panel -->
+        <aside class="w-full lg:w-96 flex-shrink-0 order-first lg:order-first">
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 p-5 sticky top-24 flex flex-col max-h-[calc(100vh-7rem)]">
+                
+                <!-- Header -->
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-lg font-bold border border-emerald-100">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-extrabold text-slate-900 text-lg">רשימת הקניות שלי</h2>
+                            <p class="text-xs text-slate-500 font-medium" id="sidebar-subtitle">0 מוצרים בסל</p>
+                        </div>
+                    </div>
+                    <button onclick="clearShoppingList()" title="נקה רשימה" class="text-xs text-rose-500 hover:bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-100 font-semibold transition-all flex items-center gap-1.5 active:scale-95">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>נקה</span>
+                    </button>
+                </div>
+
+                <!-- Price Summary Box -->
+                <div class="py-3 px-4 my-2 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-600">סה"כ לתשלום משוער:</span>
+                    <span id="total-price" class="text-lg font-black text-emerald-600">₪0.00</span>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="py-2 border-b border-slate-100">
+                    <div class="flex justify-between text-xs font-bold text-slate-600 mb-1.5">
+                        <span id="progress-text">הושלמו 0 מתוך 0</span>
+                        <span id="progress-percent" class="text-emerald-600">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden p-0.5">
+                        <div id="progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Shopping List Items Scroll Area -->
+                <div id="shopping-items-container" class="flex-1 overflow-y-auto py-3 space-y-2 pr-1">
+                    <!-- Items rendered dynamically -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-shopping-list" class="py-12 flex flex-col items-center justify-center text-center">
+                    <div class="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center text-2xl mb-3 shadow-sm border border-emerald-100/50">
+                        <i class="fa-solid fa-basket-shopping"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-700">הרשימה ריקה</h3>
+                    <p class="text-slate-400 text-xs mt-1">חפש מוצרים משמאל או הוסף מוצר חדש</p>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="pt-4 border-t border-slate-100 mt-auto flex gap-2">
+                    <button onclick="copyListToClipboard()" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-slate-900/10 transition-all active:scale-95">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>העתק רשימה ללוח</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CENTER / LEFT AREA: Catalog, Search & Main Interaction -->
+        <section class="flex-1 min-w-0 flex flex-col gap-6">
+
+            <!-- Search & Filter Bar -->
+            <div class="flex flex-col gap-3 bg-white p-4 sm:p-5 rounded-3xl shadow-sm border border-slate-200/80">
+                <div class="relative w-full">
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="search-input" oninput="handleSearch(event)" placeholder="חפש או הקלד שם מוצר להוספה מהירה (למשל: תפוח עץ, חלב, לחם)..." class="w-full pl-4 pr-11 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white text-sm font-medium transition-all">
+                </div>
+
+                <div class="flex items-center gap-2 overflow-x-auto w-full pb-1 scrollbar-none">
+                    <button onclick="filterCategory('הכל')" id="cat-btn-הכל" class="category-tab whitespace-nowrap px-4 py-2 rounded-2xl text-xs font-bold transition-all bg-emerald-600 text-white shadow-md shadow-emerald-600/20">
+                        הכל
+                    </button>
+                    <button onclick="filterCategory('פירות וירקות')" id="cat-btn-פירות וירקות" class="category-tab whitespace-nowrap px-4 py-2 rounded-2xl text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+                        🍅 פירות וירקות
+                    </button>
+                    <button onclick="filterCategory('מוצרי חלב')" id="cat-btn-מוצרי חלב" class="category-tab whitespace-nowrap px-4 py-2 rounded-2xl text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+                        🥛 מוצרי חלב
+                    </button>
+                    <button onclick="filterCategory('מאפים')" id="cat-btn-מאפים" class="category-tab whitespace-nowrap px-4 py-2 rounded-2xl text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+                        🍞 מאפים
+                    </button>
+                    <button onclick="filterCategory('מזון יבש')" id="cat-btn-מזון יבש" class="category-tab whitespace-nowrap px-4 py-2 rounded-2xl text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+                        🌾 מזון יבש
+                    </button>
+                    <button onclick="filterCategory('בשר ודגים')" id="cat-btn-בשר ודגים" class="category-tab whitespace-nowrap px-4 py-2 rounded-2xl text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+                        🥩 בשר ודגים
+                    </button>
+                    <button onclick="filterCategory('משקאות')" id="cat-btn-משקאות" class="category-tab whitespace-nowrap px-4 py-2 rounded-2xl text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+                        🥤 משקאות
+                    </button>
+                    <button onclick="filterCategory('חומרי ניקוי')" id="cat-btn-חומרי ניקוי" class="category-tab whitespace-nowrap px-4 py-2 rounded-2xl text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+                        🧼 חומרי ניקוי
+                    </button>
+                </div>
+            </div>
+
+            <!-- Catalog Grid Header -->
+            <div class="flex items-center justify-between px-1">
+                <div class="flex items-center gap-2">
+                    <h2 class="text-lg font-black text-slate-900 tracking-tight" id="catalog-title">מאגר המוצרים האישי שלך</h2>
+                    <span id="current-super-badge" class="text-xs bg-slate-200 text-slate-700 px-2.5 py-1 rounded-xl font-bold">שופרסל</span>
+                </div>
+                <span class="text-xs text-slate-500 font-semibold" id="catalog-count">0 מוצרים במאגר</span>
+            </div>
+
+            <!-- Catalog List Container -->
+            <div id="catalog-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- Cards rendered dynamically -->
+            </div>
+
+            <!-- Empty Search / Catalog -->
+            <div id="empty-search" class="flex flex-col items-center justify-center py-16 text-center bg-white rounded-3xl border border-slate-200/80">
+                <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-3xl flex items-center justify-center text-2xl mb-3">
+                    <i class="fa-solid fa-cart-flatbed font-light"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-700" id="empty-title">אין מוצרים במאגר עדיין</h3>
+                <p class="text-slate-400 text-xs mt-1" id="empty-desc">התחל להקליד בשורת החיפוש למעלה או לחץ על הכפתור כדי להוסיף מוצר חדש</p>
+                <button onclick="quickAddFromSearch()" id="quick-add-btn" class="mt-4 bg-emerald-600 text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-md shadow-emerald-600/20 hover:bg-emerald-700 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>הוסף לרשימת המוצרים</span>
+                </button>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Custom Product Modal -->
+    <div id="custom-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-95 opacity-0" id="modal-content">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+                <h3 class="font-extrabold text-lg text-slate-900">הוספת מוצר חדש</h3>
+                <button onclick="closeCustomModal()" class="w-8 h-8 rounded-xl bg-slate-200/60 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form onsubmit="handleCustomProductSubmit(event)" class="p-6 flex flex-col gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5">שם המוצר *</label>
+                    <div class="relative">
+                        <input type="text" id="custom-name" required placeholder="למשל: תפוח עץ, חלב 3%, לחם דגנים..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm font-medium">
+                        <button type="button" onclick="autoEstimatePriceWithAI()" title="זיהוי ותמחור אוטומטי ב-AI" class="absolute left-2 top-1/2 -translate-y-1/2 text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 p-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span class="text-[10px]">AI</span>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5">מחיר משוער (₪) - <span class="text-emerald-600 font-normal">השאר ריק לתמחור אוטומטי ב-AI</span></label>
+                    <input type="number" step="0.1" id="custom-price" placeholder="ייקבע אוטומטית ע&quot;י AI אם נשאר ריק" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5">קטגוריה *</label>
+                    <select id="custom-category" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm font-medium">
+                        <option value="פירות וירקות">🍅 פירות וירקות</option>
+                        <option value="מוצרי חלב">🥛 מוצרי חלב</option>
+                        <option value="מאפים">🍞 מאפים</option>
+                        <option value="מזון יבש">🌾 מזון יבש</option>
+                        <option value="בשר ודגים">🥩 בשר ודגים</option>
+                        <option value="משקאות">🥤 משקאות</option>
+                        <option value="חומרי ניקוי">🧼 חומרי ניקוי</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                    <button type="button" onclick="closeCustomModal()" class="px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-bold text-sm">ביטול</button>
+                    <button type="submit" id="submit-custom-btn" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-md shadow-emerald-600/20 flex items-center gap-2">
+                        <span>הוסף למאגר</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Family Sync Modal -->
+    <div id="family-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 text-center">
+            <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3">
+                <i class="fa-solid fa-house-user"></i>
+            </div>
+            <h3 class="font-extrabold text-xl text-slate-900 mb-1">סנכרון רשימה משפחתית</h3>
+            <p class="text-xs text-slate-500 font-medium mb-5">הכנס קוד משפחתי משותף (למשל: <span class="font-bold text-emerald-600">cohen-family</span>) כדי שכל בני המשפחה ייחשפו ויעדכנו את אותה הרשימה בזמן אמת!</p>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5 text-right">קוד משפחה משותף</label>
+                    <input type="text" id="family-code-input" placeholder="למשל: cohen2026" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-bold text-center">
+                </div>
+                <button onclick="joinFamilyGroup()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-md transition-all">
+                    התחבר לקבוצה המשפחתית
+                </button>
+                <button onclick="closeFamilySyncModal()" class="w-full py-2.5 text-slate-500 text-xs font-bold">
+                    סגור
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl z-50 flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toast-message" class="text-sm font-bold">הפעולה בוצעה בהצלחה</span>
+    </div>
+
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'family-shopping-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        
+        let db = null;
+        let auth = null;
+        let currentFamilyCode = localStorage.getItem('family_code') || '';
+
+        if (firebaseConfig) {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            // Auth flow
+            const initAuth = async () => {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            };
+            initAuth();
+
+            onAuthStateChanged(auth, (user) => {
+                if (user && currentFamilyCode) {
+                    subscribeToFamilyList(currentFamilyCode);
+                }
+            });
+        }
+
+        window.familyDB = db;
+        window.getFamilyCode = () => currentFamilyCode;
+
+        window.subscribeToFamilyList = (familyCode) => {
+            if (!db || !familyCode) return;
+            const listRef = doc(db, 'artifacts', appId, 'public', 'data', 'family_lists', familyCode);
+            
+            onSnapshot(listRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    if (data.shoppingList) {
+                        window.shoppingList = data.shoppingList;
+                        window.saveAndRenderShoppingList(false);
+                    }
+                }
+            }, (error) => console.log('Sync error:', error));
+        };
+
+        window.syncFamilyListToCloud = async () => {
+            if (!db || !currentFamilyCode) return;
+            try {
+                const listRef = doc(db, 'artifacts', appId, 'public', 'data', 'family_lists', currentFamilyCode);
+                await setDoc(listRef, {
+                    shoppingList: window.shoppingList,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+            } catch (err) {
+                console.error("Cloud sync error:", err);
+            }
+        };
+
+        window.openFamilySyncModal = () => {
+            document.getElementById('family-code-input').value = currentFamilyCode;
+            document.getElementById('family-modal').classList.remove('hidden');
+        };
+
+        window.closeFamilySyncModal = () => {
+            document.getElementById('family-modal').classList.add('hidden');
+        };
+
+        window.joinFamilyGroup = () => {
+            const code = document.getElementById('family-code-input').value.trim().toLowerCase();
+            if (!code) return;
+            currentFamilyCode = code;
+            localStorage.setItem('family_code', code);
+            document.getElementById('family-code-btn-text').textContent = `קוד: ${code}`;
+            if (window.subscribeToFamilyList) window.subscribeToFamilyList(code);
+            window.closeFamilySyncModal();
+            window.showToast(`מחובר לקבוצה: ${code}`);
+        };
+    </script>
+
+    <!-- Application Logic Javascript -->
+    <script>
+        // Global variables
+        let selectedSupermarket = 'שופרסל';
+        let currentCategoryFilter = 'הכל';
+        let searchQuery = '';
+
+        // Gemini API Configuration
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+        // Products database starts EMPTY
+        let products = JSON.parse(localStorage.getItem('my_shopping_products')) || [];
+        window.shoppingList = JSON.parse(localStorage.getItem('my_shopping_list')) || [];
+
+        // Initialize application
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedSuper = localStorage.getItem('selected_supermarket');
+            if (savedSuper) {
+                selectedSupermarket = savedSuper;
+                document.getElementById('supermarket-select').value = savedSuper;
+                document.getElementById('super-onboarding-modal').classList.add('hidden');
+            } else {
+                document.getElementById('super-onboarding-modal').classList.remove('hidden');
+            }
+            
+            const familyCode = localStorage.getItem('family_code');
+            if (familyCode) {
+                document.getElementById('family-code-btn-text').textContent = `קוד: ${familyCode}`;
+            }
+
+            updateSupermarketUI();
+            renderCatalog();
+            renderShoppingList();
+        });
+
+        // Supermarket Selection Functions
+        function selectSupermarketFromModal(superName) {
+            selectedSupermarket = superName;
+            localStorage.setItem('selected_supermarket', superName);
+            document.getElementById('supermarket-select').value = superName;
+            document.getElementById('super-onboarding-modal').classList.add('hidden');
+            updateSupermarketUI();
+            renderCatalog();
+            renderShoppingList();
+            showToast(`נבחר סופר: ${superName}`);
+        }
+
+        function changeSupermarket(superName) {
+            selectedSupermarket = superName;
+            localStorage.setItem('selected_supermarket', superName);
+            updateSupermarketUI();
+            renderCatalog();
+            renderShoppingList();
+            showToast(`הסופר עודכן ל: ${superName}`);
+        }
+
+        function updateSupermarketUI() {
+            document.getElementById('current-super-badge').textContent = selectedSupermarket;
+        }
+
+        // Filter and Search Functions
+        function filterCategory(cat) {
+            currentCategoryFilter = cat;
+            document.querySelectorAll('.category-tab').forEach(btn => {
+                btn.classList.remove('bg-emerald-600', 'text-white', 'shadow-md', 'shadow-emerald-600/20');
+                btn.classList.add('bg-slate-100', 'text-slate-600');
+            });
+            
+            const activeBtn = document.getElementById(`cat-btn-${cat}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
+                activeBtn.classList.add('bg-emerald-600', 'text-white', 'shadow-md', 'shadow-emerald-600/20');
+            }
+            
+            renderCatalog();
+        }
+
+        function handleSearch(e) {
+            searchQuery = e.target.value.toLowerCase().trim();
+            renderCatalog();
+        }
+
+        // Quick Add from search input
+        function quickAddFromSearch() {
+            if (searchQuery) {
+                document.getElementById('custom-name').value = searchQuery;
+            }
+            openCustomModal();
+        }
+
+        // Render Catalog Grid
+        function renderCatalog() {
+            const grid = document.getElementById('catalog-grid');
+            const emptySearch = document.getElementById('empty-search');
+            grid.innerHTML = '';
+
+            const filtered = products.filter(item => {
+                const matchesCategory = currentCategoryFilter === 'הכל' || item.category === currentCategoryFilter;
+                const matchesSearch = item.name.toLowerCase().includes(searchQuery);
+                return matchesCategory && matchesSearch;
+            });
+
+            document.getElementById('catalog-count').textContent = `מוצגים ${filtered.length} מוצרים`;
+
+            if (filtered.length === 0) {
+                grid.classList.add('hidden');
+                emptySearch.classList.remove('hidden');
+                emptySearch.classList.add('flex');
+
+                if (searchQuery) {
+                    document.getElementById('empty-title').textContent = `לא נמצא "${searchQuery}" במאגר`;
+                    document.getElementById('empty-desc').textContent = 'לחץ למטה כדי להוסיף מוצר זה למאגר המוצרים שלך';
+                    document.getElementById('quick-add-btn').querySelector('span').textContent = `הוסף את "${searchQuery}" למאגר`;
+                } else {
+                    document.getElementById('empty-title').textContent = 'אין מוצרים במאגר עדיין';
+                    document.getElementById('empty-desc').textContent = 'התחל להקליד בשורת החיפוש למעלה או לחץ על הכפתור כדי להוסיף מוצר חדש';
+                    document.getElementById('quick-add-btn').querySelector('span').textContent = 'הוסף מוצר חדש';
+                }
+                return;
+            }
+
+            grid.classList.remove('hidden');
+            emptySearch.classList.add('hidden');
+            emptySearch.classList.remove('flex');
+
+            filtered.forEach(item => {
+                const price = item.prices && item.prices[selectedSupermarket] 
+                    ? item.prices[selectedSupermarket].toFixed(2) 
+                    : (item.price ? item.price.toFixed(2) : '0.00');
+                
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex items-center justify-between group";
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-base flex-shrink-0">
+                            <i class="fa-solid fa-tag"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 block">${item.category}</span>
+                            <h3 class="font-extrabold text-slate-900 text-sm leading-tight">${item.name}</h3>
+                            <span class="text-xs font-black text-emerald-600">₪${price}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="addToShoppingList(${item.id})" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 text-xs font-bold transition-all shadow-sm active:scale-95">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>הוסף לסל</span>
+                        </button>
+                        <button onclick="deleteProductFromCatalog(${item.id})" title="מחק מוצר" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-400 flex items-center justify-center text-xs transition-colors">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function deleteProductFromCatalog(id) {
+            products = products.filter(p => p.id !== id);
+            localStorage.setItem('my_shopping_products', JSON.stringify(products));
+            renderCatalog();
+            showToast('המוצר הוסר מהמאגר');
+        }
+
+        // Shopping List Management
+        function addToShoppingList(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingIndex = shoppingList.findIndex(item => item.id === productId);
+            if (existingIndex > -1) {
+                shoppingList[existingIndex].quantity += 1;
+            } else {
+                shoppingList.push({
+                    id: product.id,
+                    name: product.name,
+                    category: product.category,
+                    prices: product.prices || { [selectedSupermarket]: product.price || 0 },
+                    quantity: 1,
+                    checked: false
+                });
+            }
+
+            saveAndRenderShoppingList();
+            showToast(`נוסף לרשימה: ${product.name}`);
+        }
+
+        function updateQuantity(productId, delta) {
+            const index = shoppingList.findIndex(item => item.id === productId);
+            if (index > -1) {
+                shoppingList[index].quantity += delta;
+                if (shoppingList[index].quantity <= 0) {
+                    shoppingList.splice(index, 1);
+                }
+                saveAndRenderShoppingList();
+            }
+        }
+
+        function toggleCheckItem(productId) {
+            const item = shoppingList.find(i => i.id === productId);
+            if (item) {
+                item.checked = !item.checked;
+                saveAndRenderShoppingList();
+            }
+        }
+
+        function deleteItem(productId) {
+            shoppingList = shoppingList.filter(item => item.id !== productId);
+            saveAndRenderShoppingList();
+        }
+
+        function clearShoppingList() {
+            if (shoppingList.length === 0) return;
+            shoppingList = [];
+            saveAndRenderShoppingList();
+            showToast('רשימת הקניות נוקתה');
+        }
+
+        function saveAndRenderShoppingList(syncCloud = true) {
+            localStorage.setItem('my_shopping_list', JSON.stringify(shoppingList));
+            renderShoppingList();
+            if (syncCloud && window.syncFamilyListToCloud) {
+                window.syncFamilyListToCloud();
+            }
+        }
+
+        function renderShoppingList() {
+            const container = document.getElementById('shopping-items-container');
+            const emptyState = document.getElementById('empty-shopping-list');
+            container.innerHTML = '';
+
+            const totalItemsCount = shoppingList.reduce((acc, curr) => acc + curr.quantity, 0);
+            const checkedItemsCount = shoppingList.filter(i => i.checked).reduce((acc, curr) => acc + curr.quantity, 0);
+            
+            document.getElementById('sidebar-subtitle').textContent = `${totalItemsCount} מוצרים בסל`;
+
+            if (shoppingList.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                document.getElementById('total-price').textContent = '₪0.00';
+                document.getElementById('progress-text').textContent = 'הושלמו 0 מתוך 0';
+                document.getElementById('progress-percent').textContent = '0%';
+                document.getElementById('progress-bar').style.width = '0%';
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+
+            let totalPrice = 0;
+
+            shoppingList.forEach(item => {
+                const itemPrice = item.prices && item.prices[selectedSupermarket] 
+                    ? item.prices[selectedSupermarket] 
+                    : (item.price || 0);
+                
+                const itemTotal = itemPrice * item.quantity;
+                totalPrice += itemTotal;
+
+                const row = document.createElement('div');
+                row.className = `p-3 rounded-2xl border transition-all flex items-center justify-between gap-2 ${
+                    item.checked ? 'bg-emerald-50/40 border-emerald-100 opacity-75' : 'bg-white border-slate-100 shadow-sm'
+                }`;
+
+                row.innerHTML = `
+                    <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                        <button onclick="toggleCheckItem(${item.id})" class="w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
+                            item.checked ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 hover:border-emerald-500'
+                        }">
+                            ${item.checked ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+                        </button>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="text-xs font-extrabold text-slate-800 truncate ${item.checked ? 'line-through text-slate-400' : ''}">${item.name}</h4>
+                            <span class="text-[11px] font-semibold text-emerald-600">₪${itemTotal.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-100">
+                        <button onclick="updateQuantity(${item.id}, -1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-bold shadow-2xs">
+                            <i class="fa-solid fa-minus"></i>
+                        </button>
+                        <span class="text-xs font-black text-slate-800 px-1.5">${item.quantity}</span>
+                        <button onclick="updateQuantity(${item.id}, 1)" class="w-6 h-6 rounded-lg bg-white hover:bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-bold shadow-2xs">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+
+                    <button onclick="deleteItem(${item.id})" class="w-7 h-7 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 flex items-center justify-center transition-colors">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                `;
+                container.appendChild(row);
+            });
+
+            document.getElementById('total-price').textContent = `₪${totalPrice.toFixed(2)}`;
+            
+            const percent = totalItemsCount > 0 ? Math.round((checkedItemsCount / totalItemsCount) * 100) : 0;
+            document.getElementById('progress-text').textContent = `הושלמו ${checkedItemsCount} מתוך ${totalItemsCount}`;
+            document.getElementById('progress-percent').textContent = `${percent}%`;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+        }
+
+        // Custom Product Modal
+        function openCustomModal() {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeCustomModal() {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('modal-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        // Call Gemini API to estimate price and category for any product string
+        async function fetchAIProductInfo(productName) {
+            const prompt = `Give an estimated realistic supermarket price in Israeli Shekels (ILS/₪) and the most fitting category for the grocery item "${productName}". 
+Valid categories are: "פירות וירקות", "מוצרי חלב", "מאפים", "מזון יבש", "בשר ודגים", "משקאות", "חומרי ניקוי".
+Respond ONLY with a valid JSON object matching schema: {"price": number, "category": string}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            price: { type: "NUMBER" },
+                            category: { type: "STRING" }
+                        },
+                        required: ["price", "category"]
+                    }
+                }
+            };
+
+            let retries = 0;
+            let delay = 1000;
+            while (retries < 3) {
+                try {
+                    const res = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await res.json();
+                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (text) {
+                        return JSON.parse(text);
+                    }
+                } catch (e) {
+                    // Retry with exponential backoff
+                }
+                await new Promise(r => setTimeout(r, delay));
+                delay *= 2;
+                retries++;
+            }
+            return { price: 9.9, category: "מזון יבש" };
+        }
+
+        async function autoEstimatePriceWithAI() {
+            const nameInput = document.getElementById('custom-name');
+            const name = nameInput.value.trim();
+            if (!name) {
+                showToast('אנא הקלד שם מוצר ראשית');
+                return;
+            }
+
+            const btn = document.getElementById('submit-custom-btn');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>מחשב AI...</span>`;
+
+            try {
+                const info = await fetchAIProductInfo(name);
+                if (info.price) {
+                    document.getElementById('custom-price').value = info.price.toFixed(2);
+                }
+                if (info.category) {
+                    document.getElementById('custom-category').value = info.category;
+                }
+                showToast(`AI זיהה מחיר משוער: ₪${info.price.toFixed(2)}`);
+            } catch (err) {
+                showToast('לא ניתן להשיק מחיר ב-AI כעת');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span>הוסף למאגר</span>`;
+            }
+        }
+
+        async function handleCustomProductSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('custom-name').value.trim();
+            let inputPrice = parseFloat(document.getElementById('custom-price').value);
+            let category = document.getElementById('custom-category').value;
+
+            const submitBtn = document.getElementById('submit-custom-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>מעבד AI...</span>`;
+
+            // If price wasn't specified, ask Gemini AI to evaluate
+            if (isNaN(inputPrice) || inputPrice <= 0) {
+                try {
+                    const aiResult = await fetchAIProductInfo(name);
+                    inputPrice = aiResult.price || 9.9;
+                    if (aiResult.category) category = aiResult.category;
+                } catch (err) {
+                    inputPrice = 9.9;
+                }
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<span>הוסף למאגר</span>`;
+
+            const newProduct = {
+                id: Date.now(),
+                name,
+                category,
+                prices: {
+                    'שופרסל': Number(inputPrice.toFixed(2)),
+                    'רמי לוי': Number(Math.max(1, inputPrice * 0.92).toFixed(2)),
+                    'יוחננוף': Number(inputPrice.toFixed(2)),
+                    'אושר עד': Number(Math.max(1, inputPrice * 0.88).toFixed(2)),
+                    'ויקטורי': Number((inputPrice * 0.98).toFixed(2))
+                }
+            };
+
+            products.unshift(newProduct);
+            localStorage.setItem('my_shopping_products', JSON.stringify(products));
+            
+            renderCatalog();
+            addToShoppingList(newProduct.id);
+            closeCustomModal();
+            showToast(`המוצר ${name} (₪${inputPrice.toFixed(2)}) נוסף במקור AI`);
+
+            document.getElementById('custom-name').value = '';
+            document.getElementById('custom-price').value = '';
+        }
+
+        // Clipboard Copy
+        function copyListToClipboard() {
+            if (shoppingList.length === 0) {
+                showToast('הרשימה ריקה');
+                return;
+            }
+
+            let text = `🛒 *רשימת קניות מ-${selectedSupermarket}* 🛒\n\n`;
+            let total = 0;
+
+            shoppingList.forEach(item => {
+                const itemPrice = item.prices && item.prices[selectedSupermarket] 
+                    ? item.prices[selectedSupermarket] 
+                    : (item.price || 0);
+                const subtotal = itemPrice * item.quantity;
+                total += subtotal;
+                text += `${item.checked ? '✅' : '▫️'} ${item.name} x${item.quantity} (₪${subtotal.toFixed(2)})\n`;
+            });
+
+            text += `\n💰 *סה"כ משוער:* ₪${total.toFixed(2)}`;
+
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            showToast('רשימת הקניות הועתקה ללוח!');
+        }
+
+        // Toast Helper
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
